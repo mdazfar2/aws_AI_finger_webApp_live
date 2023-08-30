@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Azfar Alam Webapp LiveStreaming</title>
+  <meta charset="utf-8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="theme-color" content="#000">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="mobile-web-video-playback.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+  <div id="videoContainer">
+    <video id="video" playsinline></video>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <script>
+	    alert("start");
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream;
+            })
+            .catch((error) => {
+                console.error('Error accessing webcam:', error);
+            });
+
+
+        setInterval(() => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob((blob) => {
+                const formData = new FormData();
+		    let i = 0;
+		    formData.append('image', blob, `image${i++}.png` );
+                fetch('https://13.232.154.205/cgi-bin/upload.py', { method: 'POST', body: formData })
+                    .then(response => response.text())
+                    .then(data => document.getElementById("d1").innerHTML = data )
+                    .catch(error => console.error('Error uploading image:', error));
+            });
+        }, 2000);
+
+    </script>
+    <div id="videoControls">
+      <button id="playPauseButton"></button>
+      <button id="toggleFullscreenButton"></button>
+      <button id="seekForwardButton"></button>
+      <button id="seekBackwardButton"></button>
+      <div id="videoCurrentTime"></div>
+      <div id="videoDuration"></div>
+      <div id="videoProgressBar"></div>
+    </div>
+  </div>
+  <h2>
+  <center>  <div id="d1">Status is Coming ..</div></center>
+  </h2>
+  <script src="tiny-fullscreen-shim.js"></script>
+  <script src="mobile-web-video-playback.js"></script>
+
+</body>
+</html>
